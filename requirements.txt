@@ -63,3 +63,9 @@ typeguard==2.13.3
 typing-extensions==4.2.0
 urllib3==1.26.9
 zipp==3.8.0
+runpod
+yt-dlp
+gofile
+Flask
+Werkzeug==2.0.3
+requests
