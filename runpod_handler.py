@@ -219,7 +219,7 @@ class VideoProcessor:
             cap = cv2.VideoCapture(video_file_path)
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS))
+            fps = cap.get(cv2.CAP_PROP_FPS)
             cap.release()
 
             # The core task execution
