@@ -21,8 +21,13 @@ COPY requirements.txt .
 # Install Python dependencies
 # Using --no-cache-dir to reduce image size
 # Pinning pip version for consistency
-RUN pip install --no-cache-dir --upgrade pip==23.3.1 \
-    && pip install --no-cache-dir -r requirements.txt \
+RUN pip install --no-cache-dir --upgrade pip==23.3.1
+
+# Install PyTorch with CUDA 11.3 support
+RUN pip install --no-cache-dir torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
+
+# Install other dependencies from requirements.txt and specific packages
+RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir runpod yt-dlp gofile Flask Werkzeug==2.0.3
 
 # Copy the rest of the application code into the container
