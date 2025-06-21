@@ -65,7 +65,7 @@ urllib3==1.26.9
 zipp==3.8.0
 runpod
 yt-dlp
-gofile
+# gofile # Removed as it causes dependency conflicts and is replaced by curl upload
 Flask
 Werkzeug==2.0.3
 requests 

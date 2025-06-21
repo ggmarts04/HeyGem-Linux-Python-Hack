@@ -17,8 +17,7 @@ import cv2
 import requests
 import runpod
 import yt_dlp
-from gofile import Gofile
-
+# Removed gofile import
 import service.trans_dh_service
 from h_utils.custom import CustomError
 from y_utils.config import GlobalConfig
@@ -51,12 +50,27 @@ def upload_to_gofile(file_path):
     try:
         g = Gofile()
         response = g.upload(file=file_path)
-        return response["downloadPage"]
+        # Ensure the command is formatted correctly
+        command = [
+            "curl", "--upload-file", file_path,
+            f"https://transfer.sh/{os.path.basename(file_path)}"
+        ]
+        logger.info(f"Executing transfer.sh upload: {' '.join(command)}")
+        process = subprocess.run(command, capture_output=True, text=True, check=True)
+        download_url = process.stdout.strip()
+        if not download_url.startswith("http"):
+            logger.error(f"transfer.sh upload failed. Output: {download_url}")
+            return f"Failed to upload {os.path.basename(file_path)}. Details: {download_url}"
+        return download_url
+    except subprocess.CalledProcessError as e:
+        logger.error(f"transfer.sh upload failed with CalledProcessError: {e}. Output: {e.stderr}")
+        return f"Failed to upload {os.path.basename(file_path)}. Error: {e.stderr}"
+    except FileNotFoundError:
+        logger.error("curl command not found. Please ensure curl is installed in the environment.")
+        return "Failed to upload due to missing curl."
     except Exception as e:
-        logger.error(f"Gofile upload failed: {e}")
-        # Fallback or error handling
-        return f"Failed to upload {os.path.basename(file_path)}"
-
+        logger.error(f"An unexpected error occurred during transfer.sh upload: {e}")
+        return f"Failed to upload {os.path.basename(file_path)}. Unexpected error: {str(e)}"
 
 def write_video_runpod(
     output_imgs_queue,
@@ -390,11 +404,21 @@ if __name__ == "__main__":
     # This part is for local testing of the handler if needed,
     # but RunPod will call the handler function directly.
     logger.info("Starting RunPod serverless worker...")
-    runpod.serverless.start({"handler": handler})
 
-# Ensure necessary directories exist (temp, result)
-# These paths should ideally be configurable or use standard temp locations
-if not os.path.exists(GlobalConfig.instance().temp_dir):
-    os.makedirs(GlobalConfig.instance().temp_dir)
-if not os.path.exists(GlobalConfig.instance().result_dir):
-    os.makedirs(GlobalConfig.instance().result_dir)
+    # Ensure necessary directories exist before starting the server
+    # These paths should ideally be configurable or use standard temp locations
+    # Ensure GlobalConfig is initialized if not already
+    if not hasattr(GlobalConfig, '_instance'):
+        GlobalConfig.load_config("config/config.ini") # Or your default config path
+
+    temp_dir_path = GlobalConfig.instance().temp_dir
+    result_dir_path = GlobalConfig.instance().result_dir
+
+    if not os.path.exists(temp_dir_path):
+        os.makedirs(temp_dir_path)
+        logger.info(f"Created temp directory: {temp_dir_path}")
+    if not os.path.exists(result_dir_path):
+        os.makedirs(result_dir_path)
+        logger.info(f"Created result directory: {result_dir_path}")
+
+    runpod.serverless.start({"handler": handler})
