@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender1 \
     git \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
