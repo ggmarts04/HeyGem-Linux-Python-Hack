@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir --upgrade pip==23.3.1
 RUN pip install --no-cache-dir torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
 
 # Install other dependencies from requirements.txt and specific packages for RunPod
-RUN pip install --no-cache-dir -r requirements.txt runpod yt-dlp gofile Flask Werkzeug==2.0.3
+RUN pip install --no-cache-dir -r requirements.txt runpod==0.1.0 yt-dlp gofile Flask Werkzeug==2.0.3
 
 # Copy the rest of the application code into the container
 COPY . .
